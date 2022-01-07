@@ -1,27 +1,28 @@
 name: Set Bazel
 description: Set up action caches for a workspace's Bazel installations and disk cache.
 inputs:
-  name:
+  repo_name:
+    type: string
     description: The name of the repository.
-    required: true
   bazel_config_type:
+    type: string
     description: The configuration type to be used.
     default: ci
 runs:
   using: composite
   steps:
-    - name: Bazel Repo Cache for ${{ inputs.name }}
+    - name: Bazel Repo Cache for ${{ inputs.repo_name }}
       uses: cgrindel/bazel-github-actions/actions/setup_action_cache@main
       with:
         path: ~/.cache/bazel_repo
-        cache_name: ${{ inputs.name }}-repo
+        cache_name: ${{ inputs.repo_name }}-repo
         key_suffix: ${{ hashFiles('WORKSPACE') }}
 
-    - name: Bazel Disk Cache for ${{ inputs.name }}
+    - name: Bazel Disk Cache for ${{ inputs.repo_name }}
       uses: cgrindel/bazel-github-actions/actions/setup_action_cache@main
       with:
         path: ~/.cache/bazel_disk
-        cache_name: ${{ inputs.name }}-disk
+        cache_name: ${{ inputs.repo_name }}-disk
         key_suffix: ${{ github.sha }}
 
     - name: Update local.bazelrc File
