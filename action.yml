@@ -1,5 +1,6 @@
 name: Set Bazel
 description: Set up action caches for a workspace's Bazel installations and disk cache.
+
 inputs:
   repo_name:
     type: string
@@ -8,20 +9,27 @@ inputs:
     type: string
     description: The configuration type to be used.
     default: ci
+  bazel_repo_cache_dir:
+    type: string
+    default: ~/.cache/bazel_repo
+  bazel_disk_cache_dir:
+    type: string
+    default: ~/.cache/bazel_disk
+
 runs:
   using: composite
   steps:
     - name: Bazel Repo Cache for ${{ inputs.repo_name }}
       uses: cgrindel/gha_set_up_action_cache@v1
       with:
-        path: ~/.cache/bazel_repo
+        path: ${{ inputs.bazel_repo_cache_dir }}
         cache_name: ${{ inputs.repo_name }}-repo
         key_suffix: ${{ hashFiles('WORKSPACE') }}
 
     - name: Bazel Disk Cache for ${{ inputs.repo_name }}
       uses: cgrindel/gha_set_up_action_cache@v1
       with:
-        path: ~/.cache/bazel_disk
+        path: ${{ inputs.bazel_disk_cache_dir }}
         cache_name: ${{ inputs.repo_name }}-disk
         key_suffix: ${{ github.sha }}
 
@@ -29,9 +37,18 @@ runs:
       shell: bash
       env:
         BAZEL_CONFIG_TYPE: ${{ inputs.bazel_config_type }}
+        BAZEL_REPO_CACHE_DIR: ${{ inputs.bazel_repo_cache_dir }}
+        BAZEL_DISK_CACHE_DIR: ${{ inputs.bazel_disk_cache_dir }}
       run: |
         cat >>local.bazelrc <<EOF
+        # Set the config type to use
         common "--config=${BAZEL_CONFIG_TYPE}"
+
+        # Disk Cache
+        build:${BAZEL_CONFIG_TYPE} --disk_cache=${BAZEL_DISK_CACHE_DIR}
+        
+        # Repository Cache
+        build:${BAZEL_CONFIG_TYPE} --repository_cache=${BAZEL_REPO_CACHE_DIR}
         EOF
 
     - name: Output the Bazel Info
