@@ -57,6 +57,9 @@ runs:
 
     - name: Output the Bazel Info
       shell: bash
+      env:
+        WORKSPACE_DIR: ${{ inputs.workspace_dir }}
       run: |
+        cd "${WORKSPACE_DIR}"
         bazelisk info
 
