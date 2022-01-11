@@ -27,10 +27,10 @@ jobs:
     - name: Test Output
       shell: bash
       run: |
-        # echo "Repo Cache"
-        # tree ~/.cache/custom_bazel_repo
-        # echo "Disk Cache"
-        # tree ~/.cache/custom_bazel_disk
+        echo "Repo Cache"
+        tree ~/.cache/custom_bazel_repo
+        echo "Disk Cache"
+        tree ~/.cache/custom_bazel_disk
         [[ -d ~/.cache/custom_bazel_repo/content_addressable ]] || \
           (echo >&2 "Expected data to be in the repo cache." && exit 1)
         [[ -d ~/.cache/custom_bazel_dis/ac ]] || \
