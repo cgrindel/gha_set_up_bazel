@@ -5,22 +5,31 @@ on:
     branches: [ main ]
 
 jobs:
-  :
+  ubuntu_ci:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
 
-    - name: Configure the Cache
+    - name: Configure Bazel
       uses: ./
       with:
-        path: ~/.cache/ci_test_cache
-        key_prefix: "2022-01-10T16:19:15" 
-        cache_name: gha_set_up_action_cache_ci
-        key_suffix: foo
+        repo_name: gha_set_up_bazel_ci
+        bazel_repo_cache_dir: ~/.cache/custom_bazel_repo
+        bazel_disk_cache_dir: ~/.cache/custom_bazel_disk
+        workspace_dir: ci
     
-    - name: Write to the Cache Directory
+    - name: Test the Workspace
       shell: bash
       run: |
-        mkdir -p ~/.cache/ci_test_cache
-        echo "hello" > ~/.cache/ci_test_cache/foo.txt
+        cd ci
+        bazel test //...
+
+    - name: Test Output
+      shell: bash
+      run: |
+        echo "Repo Cache"
+        tree ~/.cache/custom_bazel_repo
+        echo "Disk Cache"
+        tree ~/.cache/custom_bazel_disk
+        # TODO: FINISH ME
 
