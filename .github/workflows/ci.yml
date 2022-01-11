@@ -1,0 +1,26 @@
+name: CI for PR Merge
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  :
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure the Cache
+      uses: ./
+      with:
+        path: ~/.cache/ci_test_cache
+        key_prefix: "2022-01-10T16:19:15" 
+        cache_name: gha_set_up_action_cache_ci
+        key_suffix: foo
+    
+    - name: Write to the Cache Directory
+      shell: bash
+      run: |
+        mkdir -p ~/.cache/ci_test_cache
+        echo "hello" > ~/.cache/ci_test_cache/foo.txt
+

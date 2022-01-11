@@ -15,6 +15,9 @@ inputs:
   bazel_disk_cache_dir:
     type: string
     default: ~/.cache/bazel_disk
+  workspace_dir:
+    description: The Bazel workspace directory.
+    default: "."
 
 runs:
   using: composite
@@ -36,13 +39,14 @@ runs:
     - name: Update local.bazelrc File
       shell: bash
       env:
+        WORKSPACE_DIR: ${{ inputs.workspace_dir }}
         BAZEL_CONFIG_TYPE: ${{ inputs.bazel_config_type }}
         BAZEL_REPO_CACHE_DIR: ${{ inputs.bazel_repo_cache_dir }}
         BAZEL_DISK_CACHE_DIR: ${{ inputs.bazel_disk_cache_dir }}
       run: |
-        cat >>local.bazelrc <<EOF
+        cat >> "${WORKSPACE_DIR}/local.bazelrc" <<EOF
         # Set the config type to use
-        common "--config=${BAZEL_CONFIG_TYPE}"
+        common --config=${BAZEL_CONFIG_TYPE}
 
         # Disk Cache
         build:${BAZEL_CONFIG_TYPE} --disk_cache=${BAZEL_DISK_CACHE_DIR}
