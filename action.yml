@@ -24,7 +24,7 @@ runs:
   steps:
     - name: Bazel Repo Cache for ${{ inputs.repo_name }}
       uses: cgrindel/gha_set_up_action_cache@v1
-      if: ${{ inputs.bazel_repo_cache_dir != "" }}
+      if: ${{ inputs.bazel_repo_cache_dir != '' }}
       with:
         path: ${{ inputs.bazel_repo_cache_dir }}
         cache_name: ${{ inputs.repo_name }}-repo
@@ -32,7 +32,7 @@ runs:
 
     - name: Bazel Disk Cache for ${{ inputs.repo_name }}
       uses: cgrindel/gha_set_up_action_cache@v1
-      if: ${{ inputs.bazel_disk_cache_dir != "" }}
+      if: ${{ inputs.bazel_disk_cache_dir != '' }}
       with:
         path: ${{ inputs.bazel_disk_cache_dir }}
         cache_name: ${{ inputs.repo_name }}-disk
