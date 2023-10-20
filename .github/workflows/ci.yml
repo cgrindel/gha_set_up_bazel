@@ -62,7 +62,6 @@ jobs:
         [[ ! -d ~/.cache/bazel_repo/content_addressable ]] || \
           (echo >&2 "Expected no data to be in the repo cache." && exit 1)
         echo "Disk Cache"
-        tree ~/.cache/bazel_disk
         [[ ! -d ~/.cache/bazel_disk/ac ]] || \
           (echo >&2 "Expected no data to be in the disk cache." && exit 1)
 
