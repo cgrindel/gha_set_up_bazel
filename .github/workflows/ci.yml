@@ -59,12 +59,12 @@ jobs:
       shell: bash
       run: |
         echo "Repo Cache"
-        tree ~/.cache/custom_bazel_repo
-        [[ ! -d ~/.cache/custom_bazel_repo/content_addressable ]] || \
+        tree ~/.cache/bazel_repo
+        [[ ! -d ~/.cache/bazel_repo/content_addressable ]] || \
           (echo >&2 "Expected no data to be in the repo cache." && exit 1)
         echo "Disk Cache"
-        tree ~/.cache/custom_bazel_disk
-        [[ ! -d ~/.cache/custom_bazel_disk/ac ]] || \
+        tree ~/.cache/bazel_disk
+        [[ ! -d ~/.cache/bazel_disk/ac ]] || \
           (echo >&2 "Expected no data to be in the disk cache." && exit 1)
 
   all_ci_tests:
