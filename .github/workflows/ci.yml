@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  ubuntu_ci:
+  repo_and_disk_cache_enabled:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -36,3 +36,42 @@ jobs:
         [[ -d ~/.cache/custom_bazel_disk/ac ]] || \
           (echo >&2 "Expected data to be in the disk  cache." && exit 1)
 
+  repo_and_disk_cache_disabled:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+    - name: Configure Bazel
+      uses: ./
+      with:
+        repo_name: gha_set_up_bazel_ci
+        bazel_repo_cache_dir: ""
+        bazel_disk_cache_dir: ""
+        workspace_dir: ci
+    
+    - name: Test the Workspace
+      shell: bash
+      run: |
+        cd ci
+        bazel test //...
+
+    - name: Test Output
+      shell: bash
+      run: |
+        echo "Repo Cache"
+        [[ ! -d ~/.cache/bazel_repo/content_addressable ]] || \
+          (echo >&2 "Expected no data to be in the repo cache." && exit 1)
+        echo "Disk Cache"
+        [[ ! -d ~/.cache/bazel_disk/ac ]] || \
+          (echo >&2 "Expected no data to be in the disk cache." && exit 1)
+
+  all_ci_tests:
+    runs-on: ubuntu-22.04
+    needs:
+      - repo_and_disk_cache_enabled
+      - repo_and_disk_cache_disabled
+    if: ${{ always() }}
+    steps:
+      - uses: cgrindel/gha_join_jobs@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
