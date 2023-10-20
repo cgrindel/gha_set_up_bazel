@@ -24,6 +24,7 @@ runs:
   steps:
     - name: Bazel Repo Cache for ${{ inputs.repo_name }}
       uses: cgrindel/gha_set_up_action_cache@v1
+      if: ${{ inputs.bazel_repo_cache_dir != "" }}
       with:
         path: ${{ inputs.bazel_repo_cache_dir }}
         cache_name: ${{ inputs.repo_name }}-repo
@@ -31,28 +32,45 @@ runs:
 
     - name: Bazel Disk Cache for ${{ inputs.repo_name }}
       uses: cgrindel/gha_set_up_action_cache@v1
+      if: ${{ inputs.bazel_disk_cache_dir != "" }}
       with:
         path: ${{ inputs.bazel_disk_cache_dir }}
         cache_name: ${{ inputs.repo_name }}-disk
         key_suffix: ${{ github.sha }}
 
-    - name: Update local.bazelrc File
+    - name: Update local.bazelrc File with config type
+      shell: bash
+      env:
+        WORKSPACE_DIR: ${{ inputs.workspace_dir }}
+        BAZEL_CONFIG_TYPE: ${{ inputs.bazel_config_type }}
+      run: |
+        cat >> "${WORKSPACE_DIR}/local.bazelrc" <<EOF
+        # Set the config type to use
+        common --config=${BAZEL_CONFIG_TYPE}
+        EOF
+
+    - name: Update local.bazelrc File with repo cache
       shell: bash
       env:
         WORKSPACE_DIR: ${{ inputs.workspace_dir }}
         BAZEL_CONFIG_TYPE: ${{ inputs.bazel_config_type }}
         BAZEL_REPO_CACHE_DIR: ${{ inputs.bazel_repo_cache_dir }}
+      run: |
+        cat >> "${WORKSPACE_DIR}/local.bazelrc" <<EOF
+        # Repository Cache
+        build:${BAZEL_CONFIG_TYPE} --repository_cache=${BAZEL_REPO_CACHE_DIR}
+        EOF
+
+    - name: Update local.bazelrc File with disk cache
+      shell: bash
+      env:
+        WORKSPACE_DIR: ${{ inputs.workspace_dir }}
+        BAZEL_CONFIG_TYPE: ${{ inputs.bazel_config_type }}
         BAZEL_DISK_CACHE_DIR: ${{ inputs.bazel_disk_cache_dir }}
       run: |
         cat >> "${WORKSPACE_DIR}/local.bazelrc" <<EOF
-        # Set the config type to use
-        common --config=${BAZEL_CONFIG_TYPE}
-
         # Disk Cache
         build:${BAZEL_CONFIG_TYPE} --disk_cache=${BAZEL_DISK_CACHE_DIR}
-        
-        # Repository Cache
-        build:${BAZEL_CONFIG_TYPE} --repository_cache=${BAZEL_REPO_CACHE_DIR}
         EOF
 
     - name: Output the Bazel Info
