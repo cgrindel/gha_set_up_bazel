@@ -6,7 +6,7 @@ on:
 
 jobs:
   repo_and_disk_cache_enabled:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
@@ -37,7 +37,7 @@ jobs:
           (echo >&2 "Expected data to be in the disk  cache." && exit 1)
 
   repo_and_disk_cache_disabled:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
@@ -66,7 +66,7 @@ jobs:
           (echo >&2 "Expected no data to be in the disk cache." && exit 1)
 
   all_ci_tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs:
       - repo_and_disk_cache_enabled
       - repo_and_disk_cache_disabled
