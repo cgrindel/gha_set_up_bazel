@@ -1,5 +1,7 @@
-> [!WARNING] > **This repository has been deprecated.** Please use
-> [bazel-contrib/setup-bazel](https://github.com/bazel-contrib/setup-bazel) instead.
+> [!WARNING]
+>
+> > **This repository has been deprecated.** Please use
+> > [bazel-contrib/setup-bazel](https://github.com/bazel-contrib/setup-bazel) instead.
 
 # Set Up Bazel GitHub Action
 
