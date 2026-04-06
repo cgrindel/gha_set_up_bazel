@@ -19,9 +19,6 @@ jobs:
       - name: Verify ci config enabled
         shell: bash
         run: |
-          echo "=== ~/.bazelrc contents ==="
-          cat -A ~/.bazelrc
-          echo "==========================="
           grep -q 'common --config=ci' ~/.bazelrc || \
             (echo >&2 "Expected --config=ci in ~/.bazelrc" && exit 1)
       - name: Verify output_base override removed
@@ -47,7 +44,7 @@ jobs:
       - name: Verify ci config not present
         shell: bash
         run: |
-          if grep -q '^common --config=ci' ~/.bazelrc; then
+          if grep -q 'common --config=ci' ~/.bazelrc; then
             echo >&2 "Expected --config=ci to NOT be in ~/.bazelrc"
             exit 1
           fi
