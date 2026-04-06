@@ -43,3 +43,10 @@ jobs:
         with:
           tag_name: ${{ steps.initial_tag.outputs.new_tag || steps.bump_tag.outputs.new_tag }}
           generate_release_notes: true
+      - name: Move major version tag
+        env:
+          RELEASE_TAG: ${{ steps.initial_tag.outputs.new_tag || steps.bump_tag.outputs.new_tag }}
+        run: |
+          major="${RELEASE_TAG%%.*}"
+          git tag -f "${major}" "${RELEASE_TAG}"
+          git push -f origin "${major}"
