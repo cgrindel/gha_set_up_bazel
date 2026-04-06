@@ -1,5 +1,2 @@
 # Verbose Failures
 build --verbose_failures
-
-# Strict PATH (default in Bazel 9+).
-build --incompatible_strict_action_env

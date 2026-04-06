@@ -1,0 +1,52 @@
+name: Release
+on:
+  push:
+    branches: [main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Check for existing v2 tags
+        id: check
+        run: |
+          if git tag -l 'v2.*' | grep -q .; then
+            echo "has_v2=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_v2=false" >> "$GITHUB_OUTPUT"
+          fi
+      # Bootstrap v2.0.0 if no v2.x tags exist yet
+      - name: Create initial v2 tag
+        if: steps.check.outputs.has_v2 == 'false'
+        id: initial_tag
+        uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b # v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: "2.0.0"
+          tag_prefix: v
+      # Bump patch from latest v2.x tag
+      - name: Bump version and create tag
+        if: steps.check.outputs.has_v2 == 'true'
+        id: bump_tag
+        uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b # v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
+          fetch_all_tags: true
+      - name: Create release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        with:
+          tag_name: ${{ steps.initial_tag.outputs.new_tag || steps.bump_tag.outputs.new_tag }}
+          generate_release_notes: true
+      - name: Move major version tag
+        env:
+          RELEASE_TAG: ${{ steps.initial_tag.outputs.new_tag || steps.bump_tag.outputs.new_tag }}
+        run: |
+          major="${RELEASE_TAG%%.*}"
+          git tag -f "${major}" "${RELEASE_TAG}"
+          git push -f origin "${major}"
