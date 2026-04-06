@@ -1,45 +1,37 @@
-> [!WARNING]
->
-> **This repository has been deprecated.** Please use
-> [bazel-contrib/setup-bazel](https://github.com/bazel-contrib/setup-bazel) instead.
-
 # Set Up Bazel GitHub Action
 
-GitHub Action to configure Bazel cache and settings for a specified configuration (e.g. ci). This
-action assumes that a `.bazelrc` file of the Bazel workspace and it contains a directive to load
-`local.bazelrc`.
+GitHub Action that wraps [bazel-contrib/setup-bazel](https://github.com/bazel-contrib/setup-bazel)
+to configure Bazel caching, with two additional fixes:
 
-```conf
-# Try to import a local.rc file; typically, written by CI
-try-import %workspace%/local.bazelrc
-```
+1. **Removes `startup --output_base` from `~/.bazelrc`** -- `setup-bazel` sets a shared output base
+   so cache paths are predictable. This causes integration tests that spawn their own Bazel server to
+   block on the output-base lock.
+2. **Enables `--config=ci`** -- Appends `common --config=ci` to `~/.bazelrc` so your `ci.bazelrc`
+   settings (e.g., `--announce_rc`, `--color=no`) are applied automatically.
 
-## Quickstart
+## Usage
 
 ```yaml
-name: CI for PR Merge
+- uses: cgrindel/gha_set_up_bazel@v2
+```
 
-on:
-  pull_request:
-    branches: [main]
+### Inputs
 
-jobs:
-  ubuntu_ci:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
+| Input              | Default   | Description                                             |
+| ------------------ | --------- | ------------------------------------------------------- |
+| `bazelisk_cache`   | `"true"`  | Cache Bazelisk downloads based on `.bazelversion`.      |
+| `repository_cache` | `"true"`  | Cache repositories based on `MODULE.bazel`/`WORKSPACE`. |
+| `disk_cache`       | `"false"` | Cache build outputs based on BUILD files.               |
+| `enable_ci_config` | `"true"`  | Append `common --config=ci` to `~/.bazelrc`.            |
 
-      - name: Configure Bazel
-        uses: ./
-        with:
-          repo_name: gha_set_up_bazel_ci
-          bazel_repo_cache_dir: ~/.cache/custom_bazel_repo
-          bazel_disk_cache_dir: ~/.cache/custom_bazel_disk
-          workspace_dir: ci
+### Example with disk cache and remote cache
 
-      - name: Test the Workspace
-        shell: bash
-        run: |
-          cd ci
-          bazel test //...
+```yaml
+# Using a remote cache -- disable disk cache (the default)
+- uses: cgrindel/gha_set_up_bazel@v2
+
+# Using disk cache instead of remote cache
+- uses: cgrindel/gha_set_up_bazel@v2
+  with:
+    disk_cache: "true"
 ```

@@ -1,75 +1,58 @@
 name: CI for PR Merge
-
 on:
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
 jobs:
-  repo_and_disk_cache_enabled:
+  default_settings:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
-    - name: Configure Bazel
-      uses: ./
-      with:
-        repo_name: gha_set_up_bazel_ci
-        bazel_repo_cache_dir: ~/.cache/custom_bazel_repo
-        bazel_disk_cache_dir: ~/.cache/custom_bazel_disk
-        workspace_dir: ci
-    
-    - name: Test the Workspace
-      shell: bash
-      run: |
-        cd ci
-        bazel test //...
-
-    - name: Test Output
-      shell: bash
-      run: |
-        echo "Repo Cache"
-        tree ~/.cache/custom_bazel_repo
-        [[ -d ~/.cache/custom_bazel_repo/content_addressable ]] || \
-          (echo >&2 "Expected data to be in the repo cache." && exit 1)
-        echo "Disk Cache"
-        tree ~/.cache/custom_bazel_disk
-        [[ -d ~/.cache/custom_bazel_disk/ac ]] || \
-          (echo >&2 "Expected data to be in the disk  cache." && exit 1)
-
-  repo_and_disk_cache_disabled:
+      - uses: actions/checkout@v4
+      - name: Configure Bazel
+        uses: ./
+        with:
+          disk_cache: "true"
+      - name: Test the Workspace
+        shell: bash
+        run: |
+          cd ci
+          bazel test //...
+      - name: Verify ci config enabled
+        shell: bash
+        run: |
+          grep -q '^common --config=ci' ~/.bazelrc || \
+            (echo >&2 "Expected --config=ci in ~/.bazelrc" && exit 1)
+      - name: Verify output_base override removed
+        shell: bash
+        run: |
+          if grep -q '^startup --output_base=' ~/.bazelrc; then
+            echo >&2 "Expected output_base override to be removed"
+            exit 1
+          fi
+  ci_config_disabled:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
-    - name: Configure Bazel
-      uses: ./
-      with:
-        repo_name: gha_set_up_bazel_ci
-        bazel_repo_cache_dir: ""
-        bazel_disk_cache_dir: ""
-        workspace_dir: ci
-    
-    - name: Test the Workspace
-      shell: bash
-      run: |
-        cd ci
-        bazel test //...
-
-    - name: Test Output
-      shell: bash
-      run: |
-        echo "Repo Cache"
-        [[ ! -d ~/.cache/bazel_repo/content_addressable ]] || \
-          (echo >&2 "Expected no data to be in the repo cache." && exit 1)
-        echo "Disk Cache"
-        [[ ! -d ~/.cache/bazel_disk/ac ]] || \
-          (echo >&2 "Expected no data to be in the disk cache." && exit 1)
-
+      - uses: actions/checkout@v4
+      - name: Configure Bazel
+        uses: ./
+        with:
+          enable_ci_config: "false"
+      - name: Test the Workspace
+        shell: bash
+        run: |
+          cd ci
+          bazel test //...
+      - name: Verify ci config not present
+        shell: bash
+        run: |
+          if grep -q '^common --config=ci' ~/.bazelrc; then
+            echo >&2 "Expected --config=ci to NOT be in ~/.bazelrc"
+            exit 1
+          fi
   all_ci_tests:
     runs-on: ubuntu-22.04
     needs:
-      - repo_and_disk_cache_enabled
-      - repo_and_disk_cache_disabled
+      - default_settings
+      - ci_config_disabled
     if: ${{ always() }}
     steps:
       - uses: cgrindel/gha_join_jobs@v1
