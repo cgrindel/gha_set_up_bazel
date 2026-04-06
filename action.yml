@@ -36,7 +36,7 @@ runs:
           sed -i.bak '/^startup --output_base=/d' ~/.bazelrc
           rm -f ~/.bazelrc.bak
         else
-          echo "WARNING: startup --output_base not found in ~/.bazelrc"
+          echo "::notice::startup --output_base not found in ~/.bazelrc -- setup-bazel may have changed behavior"
         fi
     - name: Enable ci config
       if: ${{ inputs.enable_ci_config == 'true' }}

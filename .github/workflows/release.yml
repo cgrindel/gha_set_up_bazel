@@ -43,5 +43,4 @@ jobs:
         with:
           tag_name: ${{ steps.initial_tag.outputs.new_tag || steps.bump_tag.outputs.new_tag }}
           name: ${{ steps.initial_tag.outputs.new_tag || steps.bump_tag.outputs.new_tag }}
-          body: ${{ steps.initial_tag.outputs.changelog || steps.bump_tag.outputs.changelog }}
           generate_release_notes: true
