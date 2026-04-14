@@ -38,8 +38,11 @@ runs:
         else
           echo "::notice::startup --output_base not found in ~/.bazelrc -- setup-bazel may have changed behavior"
         fi
+    # setup-bazel joins bazelrc entries with "\n" but omits a trailing
+    # newline, so a plain >> append concatenates onto the last line.
+    # Use printf to prepend a newline before appending.
     - name: Enable ci config
       if: ${{ inputs.enable_ci_config == 'true' }}
       shell: bash
       run: |
-        echo "common --config=ci" >> ~/.bazelrc
+        printf '\ncommon --config=ci\n' >> ~/.bazelrc

@@ -16,11 +16,12 @@ jobs:
         run: |
           cd ci
           bazel test //...
-      - name: Verify ci config enabled
+      - name: Verify ci config is on its own line
         shell: bash
         run: |
-          grep -q 'common --config=ci' ~/.bazelrc || \
-            (echo >&2 "Expected --config=ci in ~/.bazelrc" && exit 1)
+          grep -qx 'common --config=ci' ~/.bazelrc || \
+            (echo >&2 "Expected 'common --config=ci' on its own line in ~/.bazelrc"; \
+             echo >&2 "Actual contents:"; cat >&2 ~/.bazelrc; exit 1)
       - name: Verify output_base override removed
         shell: bash
         run: |
