@@ -4,7 +4,7 @@ on:
     branches: [main]
 jobs:
   default_settings:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Configure Bazel
@@ -30,7 +30,7 @@ jobs:
             exit 1
           fi
   ci_config_disabled:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Configure Bazel
@@ -50,7 +50,7 @@ jobs:
             exit 1
           fi
   all_ci_tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs:
       - default_settings
       - ci_config_disabled
